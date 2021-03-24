@@ -77,7 +77,7 @@ public class AudioConverter {
                 outputPath.renameTo(file);
                 outputPath = file;
             }
-        } else if (outputFormat == FORMAT_VORBIS) {
+        } else if (outputFormat == FORMAT_OPUS) {
             if (!path.endsWith(".ogg")) {
                 path = path.concat(".ogg");
                 File file = new File(path);

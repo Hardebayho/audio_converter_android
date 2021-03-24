@@ -22,7 +22,14 @@ extern "C" {
 namespace audio_convert {
     class AudioConverter {
     public:
-        explicit AudioConverter(std::string input) : input(std::move(input)) {}
+        explicit AudioConverter(std::string input) : input(std::move(input)) {
+            __android_log_print(ANDROID_LOG_DEBUG, "AudioConverterNative", "%s", "Codecs:");
+            const AVCodec* codec{nullptr};
+            void* opaque{nullptr};
+            while ((codec = av_codec_iterate(&opaque))) {
+                __android_log_print(ANDROID_LOG_DEBUG, "AudioConverterNative", "Name: %s, Long name: %s, Profile name: %s", codec->name, codec->long_name, codec->profiles->name);
+            }
+        }
         bool initialize() {
             reset();
             initialized = false;
@@ -90,7 +97,11 @@ namespace audio_convert {
                 __android_log_print(ANDROID_LOG_DEBUG, "AudioConverterNative", "Unable to allocate output context!");
                 return false;
             }
-            AVCodec* encoder = avcodec_find_encoder(output_codec);
+            AVCodec* encoder{nullptr};
+            if (output_codec == AV_CODEC_ID_OPUS) {
+                encoder = avcodec_find_encoder_by_name("libopus");
+            }
+            else encoder = avcodec_find_encoder(output_codec);
             if (!encoder) {
                 __android_log_print(ANDROID_LOG_DEBUG, "AudioConverterNative", "Unable to find requested encoder!");
                 return false;
